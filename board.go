@@ -2,7 +2,7 @@ package gomoku
 
 const Length = 15
 const Size = 225
-const minChain = 5
+const ChainSize = 5
 
 type Board [Size]byte
 
@@ -46,7 +46,7 @@ func (b *Board) IsChain(x, y uint8) (bool, error) {
 	for _, shift := range shifts {
 		length := 1
 		newPos := pos
-		for ; length < minChain; length++ {
+		for ; length < ChainSize; length++ {
 			isEdge := newPos/Length == 0 || newPos%Length == 0
 			if isEdge {
 				break
@@ -59,7 +59,7 @@ func (b *Board) IsChain(x, y uint8) (bool, error) {
 			}
 		}
 
-		for ; length < minChain; length++ {
+		for ; length < ChainSize; length++ {
 			isEdge := newPos/Length == Length || newPos%Length == Length
 			if isEdge {
 				break
@@ -72,7 +72,7 @@ func (b *Board) IsChain(x, y uint8) (bool, error) {
 			}
 		}
 
-		if length >= minChain {
+		if length >= ChainSize {
 			return true, nil
 		}
 	}
