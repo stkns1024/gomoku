@@ -1,12 +1,14 @@
 package gomoku
 
-const SIZE = 225
+const Length = 15
+const Size = 225
+const minChain = 5
 
-type Board [SIZE]byte
+type Board [Size]byte
 
 func NewBoard() *Board {
 	var board Board
-	for i := 0; i < SIZE; i++ {
+	for i := 0; i < Size; i++ {
 		board[i] = ' '
 	}
 
@@ -18,11 +20,11 @@ func (b *Board) Place(stone byte, x, y uint8) error {
 		return InvalidStoneError(stone)
 	}
 
-	if x >= 15 || y >= 15 {
+	if x >= Length || y >= Length {
 		return InvalidPositionError{x, y}
 	}
 
-	position := x + y*15
+	position := x + y*Length
 	if b[position] != ' ' {
 		return InvalidPositionError{x, y}
 	}
@@ -33,9 +35,46 @@ func (b *Board) Place(stone byte, x, y uint8) error {
 }
 
 func (b *Board) IsChain(x, y uint8) (bool, error) {
-	if x >= 15 || y >= 15 {
+	if x >= Length || y >= Length {
 		err := InvalidPositionError{x, y}
 		return false, err
+	}
+
+	pos := x + y*Length
+	stone := b[pos]
+	shifts := [4]uint8{1, 7, 8, 9}
+	for _, shift := range shifts {
+		length := 1
+		newPos := pos
+		for ; length < minChain; length++ {
+			isEdge := newPos/Length == 0 || newPos%Length == 0
+			if isEdge {
+				break
+			}
+
+			newPos -= shift
+
+			if b[newPos] != stone {
+				break
+			}
+		}
+
+		for ; length < minChain; length++ {
+			isEdge := newPos/Length == Length || newPos%Length == Length
+			if isEdge {
+				break
+			}
+
+			newPos += shift
+
+			if b[newPos] != stone {
+				break
+			}
+		}
+
+		if length >= minChain {
+			return true, nil
+		}
 	}
 
 	return false, nil
