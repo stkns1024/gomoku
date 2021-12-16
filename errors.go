@@ -14,5 +14,5 @@ type InvalidPositionError struct {
 }
 
 func (e InvalidPositionError) Error() string {
-	return fmt.Sprintf("invalid area (%v, %v)", e.x, e.y)
+	return fmt.Sprintf("invalid position (%v, %v)", e.x, e.y)
 }
