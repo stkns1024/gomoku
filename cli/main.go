@@ -6,7 +6,7 @@ import (
 	"github.com/stkns1024/gomoku"
 )
 
-const size = (gomoku.Length+1)*(gomoku.Length*2+2) - 1
+const size = (gomoku.Length+1)*(gomoku.Length+1)*2 - 1
 
 type Board struct {
 	*gomoku.Board
@@ -14,7 +14,6 @@ type Board struct {
 }
 
 func NewBoard() *Board {
-	//str := [size]byte{}
 	str := make([]byte, size)
 
 	// 列番号(1行目)
@@ -52,12 +51,29 @@ func NewBoard() *Board {
 	return &Board{board, str}
 }
 
+func (b *Board) Place(stone, x, y byte) error {
+	numX := uint8(x) - 97
+	numY := uint8(y) - 97
+
+	err := b.Board.Place(stone, numX, numY)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	pos := (y+1)*(gomoku.Length*2+2) + x*2 + 2
+	fmt.Println(pos)
+	b.str[pos] = stone
+
+	return nil
+}
+
 func (b *Board) String() string {
 	return string(b.str)
 }
 
 func main() {
 	board := NewBoard()
-	board.Place('x', 0, 1)
+	board.Place('X', 'a', 'b')
 	fmt.Println(board)
 }
