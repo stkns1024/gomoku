@@ -8,12 +8,12 @@ import (
 
 const size = (gomoku.Length+1)*(gomoku.Length+1)*2 - 1
 
-type Board struct {
+type board struct {
 	*gomoku.Board
 	str []byte
 }
 
-func NewBoard() *Board {
+func newBoard() *board {
 	str := make([]byte, size)
 
 	// 列番号(1行目)
@@ -47,11 +47,10 @@ func NewBoard() *Board {
 		idx++
 	}
 
-	board := gomoku.NewBoard()
-	return &Board{board, str}
+	return &board{gomoku.NewBoard(), str}
 }
 
-func (b *Board) Place(stone, x, y byte) error {
+func (b *board) place(stone, x, y byte) error {
 	numX := uint8(x) - 97
 	numY := uint8(y) - 97
 
@@ -68,12 +67,12 @@ func (b *Board) Place(stone, x, y byte) error {
 	return nil
 }
 
-func (b *Board) String() string {
+func (b *board) String() string {
 	return string(b.str)
 }
 
 func main() {
-	board := NewBoard()
-	board.Place('X', 'a', 'b')
+	board := newBoard()
+	board.place('X', 'a', 'b')
 	fmt.Println(board)
 }
