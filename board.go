@@ -21,13 +21,13 @@ type Board [Size]byte
 func NewBoard() *Board {
 	var board Board
 	for i := 0; i < Size; i++ {
-		board[i] = ' '
+		board[i] = '-'
 	}
 	return &board
 }
 
 func (b *Board) Place(stone byte, x, y uint8) error {
-	if stone != 'o' && stone != 'x' {
+	if stone != 'O' && stone != 'X' {
 		return InvalidStoneError(stone)
 	}
 
@@ -35,13 +35,13 @@ func (b *Board) Place(stone byte, x, y uint8) error {
 		return InvalidPositionError{x, y}
 	}
 
-	position := x + y*Length
+	pos := x + y*Length
 
-	if b[position] != ' ' {
+	if b[pos] != '-' {
 		return InvalidPositionError{x, y}
 	}
 
-	b[position] = stone
+	b[pos] = stone
 	return nil
 }
 
@@ -68,7 +68,7 @@ func (b *Board) IsChain(x, y uint8) (bool, error) {
 		stone = b[pos]
 	)
 
-	if stone != 'o' && stone != 'x' {
+	if stone != 'O' && stone != 'X' {
 		return false, InvalidStoneError(stone)
 	}
 
