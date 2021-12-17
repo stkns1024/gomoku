@@ -5,7 +5,7 @@ import "fmt"
 type InvalidStoneError byte
 
 func (e InvalidStoneError) Error() string {
-	return fmt.Sprintf("stone should 'o' or 'x', but is '%v'", string(e))
+	return fmt.Sprintf("stone should 'O' or 'X', but is '%v'", string(e))
 }
 
 type InvalidPositionError struct {
