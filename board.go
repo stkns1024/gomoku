@@ -1,8 +1,20 @@
 package gomoku
 
-const Length = 15
-const Size = 225
-const ChainSize = 5
+const (
+	Length      = 15
+	Size        = 225
+	ChainLength = 5
+)
+
+func min(vals ...uint8) uint8 {
+	minVal := vals[0]
+	for _, val := range vals[1:] {
+		if val < minVal {
+			minVal = val
+		}
+	}
+	return minVal
+}
 
 type Board [Size]byte
 
@@ -11,7 +23,6 @@ func NewBoard() *Board {
 	for i := 0; i < Size; i++ {
 		board[i] = ' '
 	}
-
 	return &board
 }
 
@@ -25,13 +36,25 @@ func (b *Board) Place(stone byte, x, y uint8) error {
 	}
 
 	position := x + y*Length
+
 	if b[position] != ' ' {
 		return InvalidPositionError{x, y}
 	}
 
 	b[position] = stone
-
 	return nil
+}
+
+func (b *Board) shift(stone byte, pos uint8, step uint8, maxIter int) uint8 {
+	var length uint8 = 0
+	for i := 0; i < maxIter; i++ {
+		pos += step
+		if b[pos] != stone {
+			break
+		}
+		length++
+	}
+	return length
 }
 
 func (b *Board) IsChain(x, y uint8) (bool, error) {
@@ -40,39 +63,53 @@ func (b *Board) IsChain(x, y uint8) (bool, error) {
 		return false, err
 	}
 
-	pos := x + y*Length
-	stone := b[pos]
-	shifts := [4]uint8{1, 7, 8, 9}
-	for _, shift := range shifts {
-		length := 1
-		newPos := pos
-		for ; length < ChainSize; length++ {
-			isEdge := newPos/Length == 0 || newPos%Length == 0
-			if isEdge {
-				break
-			}
+	var (
+		pos   = x + y*Length
+		stone = b[pos]
+	)
 
-			newPos -= shift
+	if stone != 'o' && stone != 'x' {
+		return false, InvalidStoneError(stone)
+	}
 
-			if b[newPos] != stone {
-				break
-			}
+	steps := [4]uint8{1, Length - 1, Length, Length + 1}
+	for _, step := range steps {
+		var (
+			length         uint8 = 1
+			maxShifts      uint8 = Length - 1
+			shiftV, shiftH uint8
+		)
+
+		if step != 1 {
+			shiftV = maxShifts - y
+		} else {
+			shiftV = Length
 		}
 
-		for ; length < ChainSize; length++ {
-			isEdge := newPos/Length == Length || newPos%Length == Length
-			if isEdge {
-				break
-			}
-
-			newPos += shift
-
-			if b[newPos] != stone {
-				break
-			}
+		switch step % Length {
+		case 0:
+			shiftH = Length
+		case 1:
+			shiftH = maxShifts - x
+		default:
+			shiftH = x
 		}
 
-		if length >= ChainSize {
+		maxIter := int(min(ChainLength-length, shiftV, shiftH))
+		length += b.shift(stone, pos, step, maxIter)
+
+		if shiftV != Length {
+			shiftV = maxShifts - shiftV
+		}
+
+		if shiftH != Length {
+			shiftH = maxShifts - shiftH
+		}
+
+		maxIter = int(min(ChainLength-length, shiftV, shiftH))
+		length += b.shift(stone, pos, -step, maxIter)
+
+		if length >= ChainLength {
 			return true, nil
 		}
 	}
