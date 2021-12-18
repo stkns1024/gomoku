@@ -72,7 +72,7 @@ func main() {
 	var (
 		board      = newBoard()
 		scanner    = bufio.NewScanner(os.Stdin)
-		moveCursor = fmt.Sprintf("\033[G\033[%dA", gomoku.Length+3)
+		moveCursor = fmt.Sprintf("\033[G\033[%dA", gomoku.Length+2)
 	)
 
 	for i := 0; i < gomoku.Size; i++ {
@@ -85,10 +85,10 @@ func main() {
 			stone = 'O'
 		}
 
-		fmt.Println()
+		var x, y uint8
 		for {
 			// 標準入力の読み込み
-			fmt.Printf("%c>\033[K", stone)
+			fmt.Printf("\n%c>\033[K", stone)
 			scanner.Scan()
 			fmt.Print("\033[G\033[2A\033[2K")
 			if err := scanner.Err(); err != nil {
@@ -100,25 +100,30 @@ func main() {
 				fmt.Print("終了します\n\n")
 				return
 			} else if len(pos) != 2 {
-				fmt.Fprintln(os.Stderr, "位置は\"列行\"で指定してください。実際の入力:", pos)
+				fmt.Fprint(os.Stderr, "位置は\"列行\"で指定してください。実際の入力:", pos)
 				continue
 			}
-			x := pos[1] - 97
-			y := pos[0] - 97
+			x = pos[1] - 97
+			y = pos[0] - 97
 
 			err := board.place(stone, x, y)
 			if err != nil {
 				switch err.(type) {
 				case gomoku.OutOfRangeError:
-					fmt.Fprintln(os.Stderr, "範囲外です")
+					fmt.Fprintf(os.Stderr, "%sは範囲外です", pos)
 				case gomoku.AlreadyExistError:
-					fmt.Fprintf(os.Stderr, "%sには既に石が存在します\n", pos)
+					fmt.Fprintf(os.Stderr, "%sには既に石が存在します", pos)
 				}
 				continue
 			}
 
-			fmt.Println()
 			break
+		}
+
+		isChain, _ := board.IsChain(x, y)
+		if isChain {
+			fmt.Printf("%cの勝利\n\n", stone)
+			return
 		}
 
 		fmt.Println(moveCursor)
