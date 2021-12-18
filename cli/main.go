@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 
 	"github.com/stkns1024/gomoku"
 )
@@ -50,18 +52,13 @@ func newBoard() *board {
 	return &board{gomoku.NewBoard(), str}
 }
 
-func (b *board) place(stone, x, y byte) error {
-	numX := uint8(x) - 97
-	numY := uint8(y) - 97
-
-	err := b.Board.Place(stone, numX, numY)
+func (b *board) place(stone byte, x, y uint8) error {
+	err := b.Board.Place(stone, x, y)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
 	pos := (y+1)*(gomoku.Length*2+2) + x*2 + 2
-	fmt.Println(pos)
 	b.str[pos] = stone
 
 	return nil
@@ -72,7 +69,58 @@ func (b *board) String() string {
 }
 
 func main() {
-	board := newBoard()
-	board.place('X', 'a', 'b')
-	fmt.Println(board)
+	var (
+		board      = newBoard()
+		scanner    = bufio.NewScanner(os.Stdin)
+		moveCursor = fmt.Sprintf("\033[G\033[%dA", gomoku.Length+3)
+	)
+
+	for i := 0; i < gomoku.Size; i++ {
+		fmt.Println(board)
+
+		var stone byte
+		if i%2 == 0 {
+			stone = 'X'
+		} else {
+			stone = 'O'
+		}
+
+		fmt.Println()
+		for {
+			// 標準入力の読み込み
+			fmt.Printf("%c>\033[K", stone)
+			scanner.Scan()
+			fmt.Print("\033[G\033[2A\033[2K")
+			if err := scanner.Err(); err != nil {
+				fmt.Fprintln(os.Stderr, "入力エラー:", err)
+				continue
+			}
+			pos := scanner.Text()
+			if pos == "q" || pos == "quit" {
+				fmt.Print("終了します\n\n")
+				return
+			} else if len(pos) != 2 {
+				fmt.Fprintln(os.Stderr, "位置は\"列行\"で指定してください。実際の入力:", pos)
+				continue
+			}
+			x := pos[1] - 97
+			y := pos[0] - 97
+
+			err := board.place(stone, x, y)
+			if err != nil {
+				switch err.(type) {
+				case gomoku.OutOfRangeError:
+					fmt.Fprintln(os.Stderr, "範囲外です")
+				case gomoku.AlreadyExistError:
+					fmt.Fprintf(os.Stderr, "%sには既に石が存在します\n", pos)
+				}
+				continue
+			}
+
+			fmt.Println()
+			break
+		}
+
+		fmt.Println(moveCursor)
+	}
 }
