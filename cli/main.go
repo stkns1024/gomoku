@@ -73,18 +73,14 @@ func main() {
 		board      = newBoard()
 		scanner    = bufio.NewScanner(os.Stdin)
 		moveCursor = fmt.Sprintf("\033[G\033[%dA", gomoku.Length+2)
-		stone      byte
-		x, y       uint8
 	)
 
+	fmt.Println(board)
 	for i := 0; i < gomoku.Size; i++ {
-		fmt.Println(board)
-
-		isChain, _ := board.IsChain(x, y)
-		if isChain {
-			fmt.Printf("%cの勝利\n\n", stone)
-			return
-		}
+		var (
+			stone byte
+			x, y  uint8
+		)
 
 		if i%2 == 0 {
 			stone = 'X'
@@ -127,5 +123,14 @@ func main() {
 		}
 
 		fmt.Println(moveCursor)
+		fmt.Println(board)
+
+		isChain, _ := board.IsChain(x, y)
+		if isChain {
+			fmt.Printf("%cの勝利\n\n", stone)
+			return
+		}
 	}
+
+	fmt.Print("引き分け\n\n")
 }
