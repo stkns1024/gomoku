@@ -32,13 +32,13 @@ func (b *Board) Place(stone byte, x, y uint8) error {
 	}
 
 	if x >= Length || y >= Length {
-		return InvalidPositionError{x, y}
+		return OutOfRangeError{x, y}
 	}
 
 	pos := x + y*Length
 
 	if b[pos] != '-' {
-		return InvalidPositionError{x, y}
+		return AlreadyExistError{x, y}
 	}
 
 	b[pos] = stone
@@ -59,7 +59,7 @@ func (b *Board) shift(stone byte, pos uint8, step uint8, maxIter int) uint8 {
 
 func (b *Board) IsChain(x, y uint8) (bool, error) {
 	if x >= Length || y >= Length {
-		err := InvalidPositionError{x, y}
+		err := OutOfRangeError{x, y}
 		return false, err
 	}
 
