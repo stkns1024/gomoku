@@ -5,14 +5,23 @@ import "fmt"
 type InvalidStoneError byte
 
 func (e InvalidStoneError) Error() string {
-	return fmt.Sprintf("stone should 'O' or 'X', but is '%v'", string(e))
+	return fmt.Sprint("使用できる石は'X'または'O'です。実際の値:", string(e))
 }
 
-type InvalidPositionError struct {
+type OutOfRangeError struct {
 	x uint8
 	y uint8
 }
 
-func (e InvalidPositionError) Error() string {
-	return fmt.Sprintf("invalid position (%v, %v)", e.x, e.y)
+func (e OutOfRangeError) Error() string {
+	return fmt.Sprintf("(%d, %d)は範囲外です", e.x, e.y)
+}
+
+type AlreadyExistError struct {
+	x uint8
+	y uint8
+}
+
+func (e AlreadyExistError) Error() string {
+	return fmt.Sprintf("(%d, %d)には既に石が存在します", e.x, e.y)
 }
