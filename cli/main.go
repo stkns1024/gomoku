@@ -58,7 +58,7 @@ func (b *board) place(stone byte, x, y uint8) error {
 		return err
 	}
 
-	pos := (y+1)*(gomoku.Length*2+2) + x*2 + 2
+	pos := (int(y)+1)*(gomoku.Length*2+2) + int(x)*2 + 2
 	b.str[pos] = stone
 
 	return nil
@@ -73,19 +73,25 @@ func main() {
 		board      = newBoard()
 		scanner    = bufio.NewScanner(os.Stdin)
 		moveCursor = fmt.Sprintf("\033[G\033[%dA", gomoku.Length+2)
+		stone      byte
+		x, y       uint8
 	)
 
 	for i := 0; i < gomoku.Size; i++ {
 		fmt.Println(board)
 
-		var stone byte
+		isChain, _ := board.IsChain(x, y)
+		if isChain {
+			fmt.Printf("%cの勝利\n\n", stone)
+			return
+		}
+
 		if i%2 == 0 {
 			stone = 'X'
 		} else {
 			stone = 'O'
 		}
 
-		var x, y uint8
 		for {
 			// 標準入力の読み込み
 			fmt.Printf("\n%c>\033[K", stone)
@@ -103,8 +109,8 @@ func main() {
 				fmt.Fprint(os.Stderr, "位置は\"列行\"で指定してください。実際の入力:", pos)
 				continue
 			}
-			x = pos[1] - 97
-			y = pos[0] - 97
+			x = pos[0] - 97
+			y = pos[1] - 97
 
 			err := board.place(stone, x, y)
 			if err != nil {
@@ -118,12 +124,6 @@ func main() {
 			}
 
 			break
-		}
-
-		isChain, _ := board.IsChain(x, y)
-		if isChain {
-			fmt.Printf("%cの勝利\n\n", stone)
-			return
 		}
 
 		fmt.Println(moveCursor)
